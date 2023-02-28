@@ -2,10 +2,39 @@ import cv2
 import numpy as np
 import pyautogui
 import math
+import tkinter as tk
 
+# GLOBAL variables
 DEBUG = True
 DETECTED = False
 
+# map piece names to FEN chars
+piece_names = {
+    'black_king': 'k',
+    'black_queen': 'q',
+    'black_rook': 'r',
+    'black_bishop': 'b',
+    'black_knight': 'n',
+    'black_pawn': 'p',
+    'white_knight': 'N',
+    'white_pawn': 'P',
+    'white_king': 'K',
+    'white_queen': 'Q',
+    'white_rook': 'R',
+    'white_bishop': 'B'
+}
+
+# array to convert board square indices to coordinates (black)
+get_square = [
+    'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+    'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+    'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+    'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+    'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+    'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+    'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+    'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
+];
 
 def show_image(image):
     cv2.namedWindow("debug", cv2.WINDOW_NORMAL)
@@ -206,6 +235,58 @@ def image2fen(chessboard):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print("Starting the app...")
+
+    # Get user variables
+    # Create the main window
+    root = tk.Tk()
+
+    # Define the dimensions of the chess grid
+    WIDTH = 640
+    HEIGHT = 640
+    ROWS = 8
+    COLS = 8
+
+    # Define the colors of the grid
+    LIGHT_COLOR = "white"
+    DARK_COLOR = "gray"
+
+    # Create the canvas to draw the grid on
+    canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
+
+    # Draw the squares of the chess grid
+    for row in range(ROWS):
+        for col in range(COLS):
+            x1 = col * (WIDTH / COLS)
+            y1 = row * (HEIGHT / ROWS)
+            x2 = (col + 1) * (WIDTH / COLS)
+            y2 = (row + 1) * (HEIGHT / ROWS)
+            color = LIGHT_COLOR if (row + col) % 2 == 0 else DARK_COLOR
+            canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+
+    # Pack the canvas into the main window and start the main event loop
+    canvas.pack()
+
+
+    # Define a function to handle clicks on the chess grid
+    def on_click(event):
+        # Get the cell that was clicked
+        col = event.x // 50
+        row = event.y // 50
+        print("Clicked on cell:", row, col)
+
+        # Add a chess piece to the clicked cell
+        x1 = col * 50
+        y1 = row * 50
+        x2 = x1 + 50
+        y2 = y1 + 50
+        canvas.create_oval(x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill="red")
+
+
+    # Bind the chess grid to the on_click function
+    canvas.bind("<Button-1>", on_click)
+
+    root.mainloop()
+
     # Call the function to detect the chessboard
     detect_chessboard()
     print("Chess detected")
